@@ -1,0 +1,94 @@
+</html>
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>员工电脑监控</title>
+<style>
+body { font-family: Arial; background: #f4f6f8; padding: 20px; }
+table { border-collapse: collapse; width: 100%; background: #fff; }
+th, td { padding: 10px; border: 1px solid #ddd; text-align: center; }
+th { background: #2c3e50; color: white; }
+.offline { background: #eee; color: #999; }
+button {
+  background: #e74c3c;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+</style>
+</head>
+<body>
+
+<h2>员工电脑监控</h2>
+<button onclick="clearData()">🧹 清理所有数据</button>
+
+<table>
+<thead>
+<tr>
+  <th>员工ID</th>
+  <th>CPU</th>
+  <th>GPU</th>
+  <th>GPU温度</th>
+  <th>内存</th>
+  <th>硬盘</th>
+  <th>最后在线</th>
+  <th>IP 地址</th>
+</tr>
+</thead>
+<tbody id="table-body"></tbody>
+</table>
+
+<script>
+async function loadData() {
+  const res = await fetch('/data');
+  const data = await res.json();
+  const tbody = document.getElementById('table-body');
+  tbody.innerHTML = '';
+
+  const now = Date.now() / 1000;
+
+  for (const id in data.employees) {
+    const item = data.employees[id];
+    const emp = item.employee;
+    const temps = item.temps || {};
+    const offline = now - item.last_seen > 5;
+
+    const tr = document.createElement('tr');
+    if (offline) tr.classList.add('offline');
+
+    // 处理 IP 地址
+    const ipAddresses = emp.ip_addresses.join('<br>');  // 将 IP 地址数组转换为带换行符的字符串
+
+    // 处理内存和硬盘信息
+    const memoryInfo = `${emp.memory.size_gb}GB`;
+    const diskInfo = `${emp.disk.total_gb}GB`;
+
+    tr.innerHTML = `
+      <td>${emp.employee_id}</td>
+      <td>${emp.cpu_model || '-'}</td>
+      <td>${emp.gpu_model || '-'}</td>
+      <td>${temps.gpu_temp ?? '-'}</td>
+      <td>${memoryInfo}</td>
+      <td>${diskInfo}</td>
+      <td>${new Date(item.last_seen * 1000).toLocaleTimeString()}</td>
+      <td>${ipAddresses}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+
+async function clearData() {
+  if (!confirm("确认清空所有员工数据？")) return;
+  await fetch('/api/clear', { method: 'POST' });
+  loadData();
+}
+
+setInterval(loadData, 1000);
+loadData();
+</script>
+
+</body>
+</html>
