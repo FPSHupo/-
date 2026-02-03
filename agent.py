@@ -19,7 +19,7 @@ clr.AddReference(os.path.join(os.getcwd(), 'OpenHardwareMonitorLib.dll'))  # DLL
 from OpenHardwareMonitor import Hardware
 
 # 目标 API 地址
-API_URL = 'http://139.155.143.38:9527/api/report'  # 请根据实际情况修改为后端的 URL
+API_URL = 'http://0.0.0.0/api/report'  # 请根据实际情况修改为后端的 URL
 
 # 获取硬件信息
 handle = Hardware.Computer()
@@ -159,3 +159,4 @@ background_thread.start()
 
 # 创建并显示任务栏图标
 icon.run()
+
