@@ -14,17 +14,42 @@ import threading
 import time
 import sys
 
+# 下载 OpenHardwareMonitorLib.dll 文件
+def download_dll():
+    dll_url = 'http://dll.hotkj.cn/OpenHardwareMonitorLib.dll'
+    dll_path = os.path.join(os.getcwd(), 'OpenHardwareMonitorLib.dll')
+
+    # 如果文件不存在，则下载
+    if not os.path.exists(dll_path):
+        print(f"正在下载 OpenHardwareMonitorLib.dll 到 {dll_path}...")
+        try:
+            response = requests.get(dll_url, stream=True)
+            if response.status_code == 200:
+                with open(dll_path, 'wb') as file:
+                    for chunk in response.iter_content(chunk_size=1024):
+                        if chunk:
+                            file.write(chunk)
+                print("下载成功！")
+            else:
+                print(f"下载失败，状态码: {response.status_code}")
+        except requests.exceptions.RequestException as e:
+            print(f"下载文件时发生错误: {e}")
+            sys.exit(1)  # 如果下载失败，退出程序
+
+# 调用函数下载 DLL 文件
+download_dll()
+
 # 加载 DLL
 clr.AddReference(os.path.join(os.getcwd(), 'OpenHardwareMonitorLib.dll'))  # DLL 在同一目录下
 from OpenHardwareMonitor import Hardware
 
 # API 地址
-API_URL = 'http://0.0.0.0/api/report' 
+API_URL = 'http://139.155.143.38:9527/api/report' 
 
 # 获取硬件信息
 handle = Hardware.Computer()
-handle.CPUEnabled = True  # 启用 CPU 模块
-handle.GPUEnabled = True  # 启用 GPU 模块
+handle.CPUEnabled = True  
+handle.GPUEnabled = True  
 handle.Open()
 
 # 先显示窗口让员工输入
@@ -33,17 +58,17 @@ employee_id = None
 def ask_employee_id():
     global employee_id
     root = tk.Tk()
-    root.withdraw()  # 隐藏主窗口
+    root.withdraw()  
 
-    while not employee_id:  # 循环提示用户输入
+    while not employee_id:  
         employee_id = simpledialog.askstring("水", "你的名字：")
         
         if not employee_id:
-            messagebox.showwarning("输入为空", "请输入！")  # 如果输入为空，弹出提示框
+            messagebox.showwarning("输入为空", "请输入！")  
 
-    root.quit()  # 关闭输入框
+    root.quit()  
 
-ask_employee_id()  # 弹出窗口要求员工输入
+ask_employee_id()  
 
 # 获取当前电脑的所有 IP 地址
 def get_ip_addresses():
@@ -158,5 +183,3 @@ background_thread.start()
 
 # 创建并显示任务栏图标
 icon.run()
-
-
