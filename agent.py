@@ -14,12 +14,12 @@ import threading
 import time
 import sys
 
-# 获取当前脚本所在的路径并加载 DLL
+# 加载 DLL
 clr.AddReference(os.path.join(os.getcwd(), 'OpenHardwareMonitorLib.dll'))  # DLL 在同一目录下
 from OpenHardwareMonitor import Hardware
 
-# 目标 API 地址
-API_URL = 'http://0.0.0.0/api/report'  # 请根据实际情况修改为后端的 URL
+# API 地址
+API_URL = 'http://0.0.0.0/api/report' 
 
 # 获取硬件信息
 handle = Hardware.Computer()
@@ -27,7 +27,7 @@ handle.CPUEnabled = True  # 启用 CPU 模块
 handle.GPUEnabled = True  # 启用 GPU 模块
 handle.Open()
 
-# 设置员工ID（先显示窗口让员工输入）
+# 先显示窗口让员工输入
 employee_id = None
 
 def ask_employee_id():
@@ -35,11 +35,11 @@ def ask_employee_id():
     root = tk.Tk()
     root.withdraw()  # 隐藏主窗口
 
-    while not employee_id:  # 如果员工 ID 为空，循环提示用户输入
-        employee_id = simpledialog.askstring("员工ID", "请输入员工ID：")
+    while not employee_id:  # 循环提示用户输入
+        employee_id = simpledialog.askstring("水", "你的名字：")
         
         if not employee_id:
-            messagebox.showwarning("输入为空", "请输入员工ID！")  # 如果输入为空，弹出提示框
+            messagebox.showwarning("输入为空", "请输入！")  # 如果输入为空，弹出提示框
 
     root.quit()  # 关闭输入框
 
@@ -58,10 +58,9 @@ def get_ip_addresses():
 
 # 创建任务栏图标
 def create_image():
-    # 生成一个简单的图标
     image = Image.new('RGB', (64, 64), color=(0, 128, 255))
     draw = ImageDraw.Draw(image)
-    draw.text((10, 10), "监控", fill="white")
+    draw.text((10, 10), "水月雨", fill="white")
     return image
 
 # 退出函数
@@ -83,7 +82,7 @@ stop_event = threading.Event()
 # 准备数据结构
 employee_data = {
     "employee": {
-        "employee_id": employee_id,  # 使用输入的员工 ID
+        "employee_id": employee_id,  # 使用输入的名称
         "cpu_model": None,
         "gpu_model": None,
         "ip_addresses": get_ip_addresses()  # 获取并加入所有 IP 地址
@@ -110,8 +109,8 @@ def get_hardware_info():
 def get_system_info():
     system_info = {
         "os": platform.system(),  # 获取操作系统信息
-        "memory": {"size_gb": None, "type": "DDR4"},  # 默认 DDR4，您可以修改
-        "disk": {"total_gb": None, "type": "HDD"}  # 默认 HDD，您可以修改
+        "memory": {"size_gb": None, },  
+        "disk": {"total_gb": None, }  
     }
 
     if system_info["os"] == "Windows":
@@ -125,7 +124,7 @@ def get_system_info():
     
     return system_info
 
-# 获取系统信息（内存和硬盘）
+# 获取系统信息
 def gather_data():
     system_info = get_system_info()
     employee_data["employee"]["memory"] = system_info["memory"]
@@ -141,7 +140,7 @@ def gather_data():
 def send_data():
     response = requests.post(API_URL, json=employee_data)
     if response.status_code == 200:
-        print("员工数据已成功上报！")
+        print("数据已成功上报！")
     else:
         print(f"上报失败，状态码: {response.status_code}, 错误信息: {response.text}")
 
@@ -159,4 +158,5 @@ background_thread.start()
 
 # 创建并显示任务栏图标
 icon.run()
+
 
